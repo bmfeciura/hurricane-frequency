@@ -6,225 +6,170 @@ Created on Thu Aug 13 18:59:47 2020
 @author: benjaminfeciura
 """
 
-import os, sys
-import pandas as pd
+# import clean_hurdat as clh
 
-root_dir = os.path.join(os.getcwd(), '..')
-sys.path.append(root_dir)
+import os
 
-
-"""
-PARTITION_HURDAT
-"""
+root_dir = os.path.join(os.getcwd())
 
 # HURDAT files come with header and data rows mixed together.
 # This function separates the raw HURDAT file {fn}.csv into two more workable
 #   CSV files, {fn}_positions.csv and {fn}_storms.csv
-def partition_hurdat(fn):
+def partition_hurdat(fn, root_dir = root_dir):
     
-    import os, sys
+    import os
     import pandas as pd
 
-    root_dir = os.path.join(os.getcwd(), '..')
-    sys.path.append(root_dir)
+    # These steps will apply both to Atlantic and Pacific datasets, so when
+    # we ultimately convert these steps into a function we'll allow the
+    # user to provide a filename. The function will always search in the
+    # raw data directory, so the filename alone will differentiate between
+    # the raw datasets.
     
-    """
-    Import the HURDAT file and replace the column names for readability
-    """
-    
+    # We're going to save the two new datasets that result from splitting
+    # the HURDAT file as separate files, so we'll use os.path.splitext to 
+    # separate the filename and extension for the raw data, then store the
+    # filename to use in appropriately naming the resulting files.
     fn_no_ext = os.path.splitext(fn)[0]
 
-    # create a list to contain our new column names (provided by HURDAT
-    #   documentation)
-    header = ['date', 'time', 'recordID', 'status', 'lat', 'long', 'maxSustWind', 'minPressure', 'extNE34', 'extSE34', 'extSW34', 'extNW34', 'extNE50', 'extSE50', 'extSW50', 'extNW50', 'extNE64', 'extSE64', 'extSW64', 'extNW64']
+    # This list of column names applies to the position data rows.
+    header = ['date', 'time', 'recordID', 'status', 'lat', 'lon', 'maxSustWind', 'minPressure', 'extNE34', 'extSE34', 'extSW34', 'extNW34', 'extNE50', 'extSE50', 'extSW50', 'extNW50', 'extNE64', 'extSE64', 'extSW64', 'extNW64']
 
+    # Import data from raw data folder using our column names.
+    hurdat = pd.read_csv(f'{root_dir}/data/01_raw/{fn}', names = header)
+        
 
-    # import the HURDAT file from raw data folder using our column names
-    hurdat = pd.read_csv(f'../data/01_raw/{fn}', names = header)
-    
-    
-    # remove our temporary header from the download process and reset the index 
-    hurdat.drop(index = 0, inplace = True)
-    hurdat.reset_index(drop=True, inplace=True)
-
-  
-    """
-    Determine which rows are Header rows
-    """
-    
-    
-    # create list to be used as new column hurdat['header']
-    header = [] 
-
-
-    # Flag header rows by exploiting the fact that all header rows,
-    #   and only header rows, contain 'AL' or 'EP'/'CP', in the Atlantic
-    #   and Eastern/Central Pacific datasets, respectively
+    # We need to determine which rows go in which new DataFrame, so create
+    # a list that can be turned into a series and added as a new column.
+    header = []
+   
+    # If there are only numeric characters in the date column, this is
+    # a position row. Otherwise, flag the row as being a header row.
     for entry in hurdat['date']:
-        if entry.find('AL') != -1: 
-            header.append(True)
-        elif entry.find('EP') != -1: 
-            header.append(True)
-        elif entry.find('CP') != -1: 
-            header.append(True)
-        else:
+        if entry.isnumeric():
             header.append(False)
- 
-    
-    # add the list as a pandas series into a column of hurdat dataFrame
+        else:
+            header.append(True)
+   
+    # Cast the list as a pandas series and add it as a column of DataFrame.
     hurdat['header'] = pd.Series(header) 
+    
+    # Create DataFrames of only header rows and only position data so we 
+    # can prepare each appropriately.
+    storms = hurdat[hurdat['header'] == True].copy() # All header columns of atl copied into new dataframe storms.
+    positions = hurdat[hurdat['header'] == False].copy() # All data columns of atl copied into new dataframe positions.
+    
 
-
-    """
-    Create dataframes of only storm names and only position data
-        so we can edit the columns and dtypes   
-    """
-    
-    
-    # all header columns of atl copied into new dataframe storms
-    storms = hurdat[hurdat['header'] == True].copy() 
-    
-    
-    # all data columns of atl copied into new dataframe positions
-    positions = hurdat[hurdat['header'] == False].copy()
-    
-    
-    """
-    For the storms dataFrame, we need to remove unnecessary columns, 
-        rename existing columns, create a new year column, and assign 
-        the correct dtypes to all columns
-    """
-
-
-    # drop unnecessary columns, rename remaining columns, and clean up indices
-    storms.drop(['status', 'lat', 'long', 'maxSustWind', 'minPressure', 'extNE34', 'extSE34', 'extSW34', 'extNW34', 'extNE50', 'extSE50', 'extSW50', 'extNW50', 'extNE64', 'extSE64', 'extSW64', 'extNW64', 'header'], axis = 1, inplace = True)
+    # Storms DataFrame:
+    # Drop unnecessary columns, including the column indicating header rows.
+    storms.drop(['status', 'lat', 'lon', 'maxSustWind', 'minPressure', 'extNE34', 'extSE34', 'extSW34', 'extNW34', 'extNE50', 'extSE50', 'extSW50', 'extNW50', 'extNE64', 'extSE64', 'extSW64', 'extNW64', 'header'], axis = 1, inplace = True)
+    # Rename remaining columns.
     storms.columns = ['stormID', 'name', 'numPositions']
+    # Reset indices to fill in gaps from position rows.
     storms.reset_index(drop=True, inplace=True)
 
-
-    # column names are as follows:
-    #
-    # 'stormID': an individual identifier for each storm in the form 
-    #   ALXXYYYY or EPXXYYYY denoting the storm was the XXth storm
-    #   of (A)t(L)antic or (E)astern (P)acific Hurricane Season YYYY. 
-    #   Useful when storms in different years share the same name, and 
-    #   for unnamed storms.
-    # 'name': name of storm.
-    # 'numPositions': the number of position entries in positions dataFrame 
-    #   corresponding to this storm
+    # We're going to want storms to easily be subsettable by years, so we'll
+    # create a new numeric column for it and fill the entries by parsing 
+    # the entries of the stormID column.
+    stormYears = []
     
-
-    # create a new list to be used as a numeric years column
-    stormYears = [] 
-
-
-    # strip out the year from the stormID.
-    # note that this year may not necessarily correspond to the calendar 
-    #   dates during which the storm existed, but rather the Hurricane 
-    #   Season to which it belonged.
+    # We can pull out the year easily since all the stormIDs share the same
+    # format. Note that this year corresponds to the storm season, but
+    # that it is possible under rare circumstances for storms to
+    # persist into the following year so the dates on position entries may
+    # not always show the year presented here.
     for stormID in storms['stormID']:
         stormYears.append(stormID[4:9]) 
-    
-    
-    # assign new year column as integer dtype
+        
+    # Assign new year column integer dtype.
     storms['year'] = pd.Series(stormYears).astype('int') 
-    # reassign number of positions integer dtype
-    storms['numPositions'] = storms['numPositions'].astype('int') 
-    # reassign storm names string dtype and strip whitespace
+    # Reassign number of positions integer dtype.
+    storms['numPositions'] = storms['numPositions'].astype('int')
+    # Strip whitespace from name and stormID values.
     storms['name'] = storms['name'].astype('str').str.strip() 
-    # reassign stormID string dtype and strip whitespace
     storms['stormID'] = storms['stormID'].astype('str').str.strip()
-    
-    
-    """
-    For the positions dataFrame we need to clean up the indices, reformat the 
-        latitude and longitude columns to make them usable by matplotlib.pyplot, 
-        create new columns for the storm name and stormId to make the 
-        dataframe searchable by these criteria
-    """
 
 
-    # clean up the indices
+    # Positions DataFrame:
+    # Reset the index.
     positions.reset_index(drop=True, inplace=True)
-
-    # we can convert the latitude and longitude information into integers 
-    #   by removing the cardinal direction.
-    # we can instead write XX.XW as -XX.X and XX.XE as XX.X.
-    # we can also write XX.XN as XX.X and XX.XS as -XX.X.
-
-
-    # create lists to be used as new series for latitude and longitude
-    intLat = []  
-    intLong = []
-        
     
-    # iterate through each latitude in the existing cardinal direction format
+    # Create lists to be used as new series for latitude and longitude. 
+    numLat = [] 
+    numLon = []
+    
     for cardLat in positions['lat']:
-        # for latitudes of degrees north, strip the whitespace and N
         if cardLat.find('N') != -1: 
-            intLat.append(cardLat.strip(" N"))
-        # for latitudes of degrees south, strip the whitespace and S, 
-        #   and add a negative to the front
+            # For latitudes of degrees North, strip the whitespace and N.
+            numLat.append(cardLat.strip(" N"))
         else: 
-            intLat.append('-'+cardLat.strip(" S"))
+            # For latitudes of degrees South, strip the whitespace and S 
+            # and make the value negative.
+            numLat.append('-'+cardLat.strip(" S"))
     
-    # iterate through each longitude in the existing cardinal direction format
-    for cardLong in positions['long']:
-        #for longitudes of degrees east, strip the whitespace and E
-        if cardLong.find('E') != -1: 
-            intLong.append(cardLong.strip(" E"))
-        # for longitudes of degrees west, strip the whitespace and W, 
-        #   and add a negative to the front
+    for cardLon in positions['lon']:
+        if cardLon.find('E') != -1: 
+            # For longitudes of degrees East, strip the whitespace and E.
+            numLon.append(cardLon.strip(" E"))
         else: 
-            intLong.append('-'+cardLong.strip(" W"))
-
-        
-    # replace the existing longitude and latitude columns with the new ones
-    positions['lat'] = pd.Series(intLat).astype('float')
-    positions['long'] = pd.Series(intLong).astype('float')
+            # For longitudes of degrees West, strip the whitespace and W 
+            # and make the value negative.
+            numLon.append('-'+cardLon.strip(" W"))
+     
+    # Replace the existing longitude and latitude columns with the new ones.
+    positions['lat'] = pd.Series(numLat).astype('float')
+    positions['lon'] = pd.Series(numLon).astype('float')
     
     
-    # use the provided number of position updates for each storm to create 
-    #   a column for the positions dataframe containing the appropriate names
-    #   (to make entries searchable by name)
-
-
-    # create a list to be used as the names column for the positions dataFrame
+    # Add storm names and stormIDs to positions DataFrame:
+    # Create a list to be used as the names column in this DataFrame
     stormNames = [] 
-
-
-    # for each storm in the storms dataFrame...
+        
+    # For each storm in the storms DataFrame...
     for i in range(len(storms)): 
-        # for the number of rows indicated, add the storm name to the list
+        # For the number of rows indicated, add the storm name to the list.
         for j in range(storms['numPositions'][i]): 
             stormNames.append(storms['name'][i])
-        
-        
-    # add the new list containing a name for every row of positions 
-    #  into positions dataFrame  
+               
+    # And create the new column using the list.      
     positions['name'] = pd.Series(stormNames)
-
-
-    # repeat the process for storm IDs
+                
+    # Repeat the process for storm IDs
     stormIDs = []
-
+                
     for i in range(len(storms)):
         for j in range(storms['numPositions'][i]):
             stormIDs.append(storms['stormID'][i])
-           
+              
     positions['stormID'] = pd.Series(stormIDs)
-    
-    # remove the now unnecessary header column
+
+    # Remove the unnecessary header indicator column.
     positions.drop(columns="header", inplace = True)
     
-    # now we can save "storms" and "positions" to new csv files in data/02_intermediate
+    # Create a column in the storms dataset with the month formed
+    month_formed = []
 
+    positions["date"] = pd.to_datetime(positions["date"], format = "%Y%m%d")
+
+    for stormID in storms["stormID"]:
+        
+        months = positions[positions["stormID"] == stormID]["date"].dt.month
+        monthslist = months.tolist()
+        month_formed.append(monthslist[0])
+
+    storms["month_formed"] = pd.Series(month_formed)
+    
+
+    # Export to files and notify the user:
+    # We'll use the filename we stored after removing the extension earlier
+    # to create the child files in the new directory.
     positions_fn = ( fn_no_ext + "_positions.csv" )
-    positions.to_csv(f"../data/02_intermediate/{positions_fn}")
+    positions.to_csv(f"{root_dir}/data/02_intermediate/{positions_fn}", index = False)
 
     storms_fn = ( fn_no_ext + "_storms.csv" )
-    storms.to_csv(f"../data/02_intermediate/{storms_fn}")
+    storms.to_csv(f"{root_dir}/data/02_intermediate/{storms_fn}", index = False)
 
+    # Verify for the user which files were created.
     print(f"Partitioned {fn} into:\n /data/02_intermediate/{positions_fn}\n /data/02_intermediate/{storms_fn}")
     
     return

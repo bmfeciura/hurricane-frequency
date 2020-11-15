@@ -1,6 +1,7 @@
-conf/
-data/
 **/.ipynb_checkpoints
 **/.DS_Store
 /.spyproject
 **/__pycache__
+notebooks/sample_workflow.ipynb
+notebooks/Atlantic_Hurricanes.ipynb
+readme.ipynb

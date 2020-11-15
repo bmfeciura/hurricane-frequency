@@ -1,40 +1,63 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on ???
 
 @author: benjaminfeciura
 """
 
-import os, sys
+# import data_download as ddln
+
+import os
 import pandas as pd
 
-root_dir = os.path.join(os.getcwd(), '..')
-sys.path.append(root_dir)
+import requests
+from bs4 import BeautifulSoup
+
+root_dir = os.path.join(os.getcwd())
 
 # function to download atlantic hurdat data
-# default values download dataset current as of 2020.08.13
-def download_atlantic_hurdat_raw(first_season = "1851", recent_season = "2019", update_date = "052520", dest_filename = "Atlantic"):
+def download_atlantic_hurdat_raw(root_dir = root_dir, dest_filename = "Atlantic"):
     
-    url = f"https://www.nhc.noaa.gov/data/hurdat/hurdat2-{first_season}-{recent_season}-{update_date}.txt"
+    URL = "https://www.nhc.noaa.gov/data/"
+    r = requests.get(URL)
 
-    download_dataset = pd.read_csv(url, header = None, names = list(range(0, 20)))
+    soup = BeautifulSoup(r.content, 'html5lib')
 
-    download_dataset.to_csv(f"../data/01_raw/{dest_filename}.csv", index = False)
+    for element in soup.find_all('span'):
+        if "Atlantic hurricane database (HURDAT2)" in element.text:
+            target = element
+    
+    source = ("https://www.nhc.noaa.gov") + (target.next_sibling.next_sibling.attrs['href'])
+
+    download_dataset = pd.read_csv(source, header = None, names = list(range(0, 20)))
+
+    download_dataset.to_csv(f"{root_dir}/data/01_raw/{dest_filename}.csv", 
+                            header = False, index = False)
 
     print(f"Downloaded data to /data/01_raw/{dest_filename}.csv")
 
+    # Show the newly downloaded dataset
     return download_dataset.head()
 
 # function to download pacific hurdat data
 # default values download dataset current as of 2020.08.13
-def download_pacific_hurdat_raw(first_season = "1949", recent_season = "2019", update_date = "042320", dest_filename = "Pacific"):
+def download_pacific_hurdat_raw(dest_filename = "Pacific"):
     
-    url = f"https://www.nhc.noaa.gov/data/hurdat/hurdat2-nepac-{first_season}-{recent_season}-{update_date}.txt"
+    URL = "https://www.nhc.noaa.gov/data/"
+    r = requests.get(URL)
 
-    download_dataset = pd.read_csv(url, header = None, names = list(range(0, 20)))
+    soup = BeautifulSoup(r.content, 'html5lib')
 
-    download_dataset.to_csv(f"../data/01_raw/{dest_filename}.csv", index = False)
+    for element in soup.find_all('span'):
+        if "Northeast and North Central Pacific hurricane database (HURDAT2)" in element.text:
+            target = element
+    
+    source = ("https://www.nhc.noaa.gov") + (target.next_sibling.next_sibling.attrs['href'])
+
+    download_dataset = pd.read_csv(source, header = None, names = list(range(0, 20)))
+
+    download_dataset.to_csv(f"../data/01_raw/{dest_filename}.csv",
+                            header = False, index = False)
 
     print(f"Downloaded data to /data/01_raw/{dest_filename}.csv")
 
