@@ -13,15 +13,15 @@ import os, sys
 import cartopy
 import matplotlib.pyplot as plt
 
-root_dir = os.path.join(os.getcwd())
+root_dir = os.path.join(os.getcwd(), "..")
 sys.path.append(root_dir)
 
 import pandas as pd
 
 PROJECTION = cartopy.crs.NearsidePerspective(central_longitude = -55, central_latitude = 30,  satellite_height = 10000000)
 
-POSITIONS = pd.read_csv('data/02_intermediate/Atlantic_positions.csv')
-STORMS = pd.read_csv('data/02_intermediate/Atlantic_storms.csv')
+POSITIONS = pd.read_csv('../data/02_intermediate/Atlantic_positions.csv')
+STORMS = pd.read_csv('../data/02_intermediate/Atlantic_storms.csv')
 
 def track_lat(stormID, positions_df = POSITIONS):
     return(positions_df['lat'][positions_df['stormID'] == stormID].tolist())
@@ -44,7 +44,7 @@ def winds(stormID, positions_df = POSITIONS):
     
     return([status, ts_ne, ts_se, ts_sw, ts_nw, hu_ne, hu_se, hu_sw, hu_nw])
 
-def plot_season_summary(year, positions_df = POSITIONS, storms_df = STORMS, export = False, fullcolor = False, root_dir = root_dir):
+def plot_season_summary(year, positions_df = POSITIONS, storms_df = STORMS, export = False, fullcolor = False):
     fig = plt.figure(figsize=(10,10))
     ax = plt.axes(projection = PROJECTION)
     ax.set_global()
@@ -58,9 +58,9 @@ def plot_season_summary(year, positions_df = POSITIONS, storms_df = STORMS, expo
         ax.plot(lon, lat, transform = cartopy.crs.PlateCarree(), c = "red")
         
     if export:
-        fig.savefig(f"{root_dir}/results/images/{year}summary.jpg")
+        fig.savefig(f"../results/images/{year}summary.jpg")
         
-def plot_storm_track(stormID, positions_df = POSITIONS, storms_df = STORMS, global_view = False, export = False, fullcolor = False, root_dir = root_dir):
+def plot_storm_track(stormID, positions_df = POSITIONS, storms_df = STORMS, global_view = False, export = False, fullcolor = False):
     if stormID == None:
         return
     
@@ -80,7 +80,7 @@ def plot_storm_track(stormID, positions_df = POSITIONS, storms_df = STORMS, glob
     ax.plot(track_lon(stormID, positions_df), track_lat(stormID, positions_df), transform = cartopy.crs.PlateCarree(), c = "red")
     
     if export:
-        fig.savefig(f"{root_dir}/results/images/{name}{year}track.jpg")
+        fig.savefig(f"../results/images/{name}{year}track.jpg")
         
         
 def stormID(name, year, storms_df = STORMS):

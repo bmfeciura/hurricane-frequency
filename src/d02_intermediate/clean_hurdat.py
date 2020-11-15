@@ -8,14 +8,11 @@ Created on Thu Aug 13 18:59:47 2020
 
 # import clean_hurdat as clh
 
-import os
-
-root_dir = os.path.join(os.getcwd())
 
 # HURDAT files come with header and data rows mixed together.
 # This function separates the raw HURDAT file {fn}.csv into two more workable
 #   CSV files, {fn}_positions.csv and {fn}_storms.csv
-def partition_hurdat(fn, root_dir = root_dir):
+def partition_hurdat(fn):
     
     import os
     import pandas as pd
@@ -36,7 +33,7 @@ def partition_hurdat(fn, root_dir = root_dir):
     header = ['date', 'time', 'recordID', 'status', 'lat', 'lon', 'maxSustWind', 'minPressure', 'extNE34', 'extSE34', 'extSW34', 'extNW34', 'extNE50', 'extSE50', 'extSW50', 'extNW50', 'extNE64', 'extSE64', 'extSW64', 'extNW64']
 
     # Import data from raw data folder using our column names.
-    hurdat = pd.read_csv(f'{root_dir}/data/01_raw/{fn}', names = header)
+    hurdat = pd.read_csv(f'../data/01_raw/{fn}', names = header)
         
 
     # We need to determine which rows go in which new DataFrame, so create
@@ -164,10 +161,10 @@ def partition_hurdat(fn, root_dir = root_dir):
     # We'll use the filename we stored after removing the extension earlier
     # to create the child files in the new directory.
     positions_fn = ( fn_no_ext + "_positions.csv" )
-    positions.to_csv(f"{root_dir}/data/02_intermediate/{positions_fn}", index = False)
+    positions.to_csv(f"../data/02_intermediate/{positions_fn}", index = False)
 
     storms_fn = ( fn_no_ext + "_storms.csv" )
-    storms.to_csv(f"{root_dir}/data/02_intermediate/{storms_fn}", index = False)
+    storms.to_csv(f"../data/02_intermediate/{storms_fn}", index = False)
 
     # Verify for the user which files were created.
     print(f"Partitioned {fn} into:\n /data/02_intermediate/{positions_fn}\n /data/02_intermediate/{storms_fn}")

@@ -10,7 +10,7 @@ I have kept a record of my learning in a series of Jupyter Notebooks (in `/noteb
 
 The structure for this project was adapted from [the Cookiecutter Data Science project structure](https://drivendata.github.io/cookiecutter-data-science/).
 
-Please note that some imports will no longer work if running the notebooks within the `/notebooks/` directory because definitions of defaults for dataset files in the modules are dependent on the working directory being the root of this project; moving the notebooks will likely work, but they are intended to be read primarily as reference materials now.
+Please note all modules are written under the assumption that code will be run from a nodebook in `/notebooks/` or from another module in `/src/`; this includes the notebook used to produce this readme. File paths are dependent on this assumption that the working directory is one level down from the root of this project, so to be safe, please run any new code in a Jupyter notebook in the `/notebooks/` directory!
 
 ### Data cleaning
 
@@ -21,6 +21,9 @@ The HURDAT2 dataset contains rows of position data for storms interspersed with 
 import os, sys
 import pandas as pd
 import numpy as np
+
+root_dir = os.path.join(os.getcwd(), "..")
+sys.path.append(root_dir)
 
 from src.d01_data.data_download import download_atlantic_hurdat_raw
 from src.d02_intermediate.clean_hurdat import partition_hurdat
@@ -38,8 +41,8 @@ partition_hurdat("Atlantic.csv")
 
 
 ```python
-positions = pd.read_csv('data/02_intermediate/Atlantic_positions.csv')
-storms = pd.read_csv('data/02_intermediate/Atlantic_storms.csv')
+positions = pd.read_csv('../data/02_intermediate/Atlantic_positions.csv')
+storms = pd.read_csv('../data/02_intermediate/Atlantic_storms.csv')
 ```
 
 ### Storm Paths

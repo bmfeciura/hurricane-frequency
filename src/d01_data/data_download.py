@@ -13,10 +13,9 @@ import pandas as pd
 import requests
 from bs4 import BeautifulSoup
 
-root_dir = os.path.join(os.getcwd())
 
 # function to download atlantic hurdat data
-def download_atlantic_hurdat_raw(root_dir = root_dir, dest_filename = "Atlantic"):
+def download_atlantic_hurdat_raw(dest_filename = "Atlantic"):
     
     URL = "https://www.nhc.noaa.gov/data/"
     r = requests.get(URL)
@@ -31,7 +30,7 @@ def download_atlantic_hurdat_raw(root_dir = root_dir, dest_filename = "Atlantic"
 
     download_dataset = pd.read_csv(source, header = None, names = list(range(0, 20)))
 
-    download_dataset.to_csv(f"{root_dir}/data/01_raw/{dest_filename}.csv", 
+    download_dataset.to_csv(f"../data/01_raw/{dest_filename}.csv", 
                             header = False, index = False)
 
     print(f"Downloaded data to /data/01_raw/{dest_filename}.csv")

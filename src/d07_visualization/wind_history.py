@@ -23,8 +23,8 @@ RADIUS = 3440.1
 
 PROJECTION = ccrs.NearsidePerspective(central_longitude = -55, central_latitude = 30,  satellite_height = 10000000)
 
-POSITIONS = pd.read_csv('data/02_intermediate/Atlantic_positions.csv')
-STORMS = pd.read_csv('data/02_intermediate/Atlantic_storms.csv')
+POSITIONS = pd.read_csv('../data/02_intermediate/Atlantic_positions.csv')
+STORMS = pd.read_csv('../data/02_intermediate/Atlantic_storms.csv')
 
 def wind_history(stormID, positions_df = POSITIONS, storms_df = STORMS):
     # Get the list of all of our coordinates, as well as the lists of wind extents

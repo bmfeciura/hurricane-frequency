@@ -28,8 +28,8 @@ RADIUS = 3440.1
 
 PROJECTION = ccrs.NearsidePerspective(central_longitude = -55, central_latitude = 30,  satellite_height = 10000000)
 
-POSITIONS = pd.read_csv('data/02_intermediate/Atlantic_positions.csv')
-STORMS = pd.read_csv('data/02_intermediate/Atlantic_storms.csv')
+POSITIONS = pd.read_csv('../data/02_intermediate/Atlantic_positions.csv')
+STORMS = pd.read_csv('../data/02_intermediate/Atlantic_storms.csv')
 
 ne_brngs = np.linspace(0, 90, 31)
 se_brngs = np.linspace(90, 180, 31)
