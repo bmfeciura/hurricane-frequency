@@ -117,10 +117,10 @@ def wind_frequency(stormlist = STORMS['stormID'][STORMS['year'] >= 2004], positi
                                     if (storm_history[y][180 + m.floor(dlon)] != 2):
                                         storm_history[y][180 + m.floor(dlon)] = 1
                                 
-                                    elif quad in [1, 2]:
-                                        for y in range((90 + m.floor(dlat)), (90 + m.ceil(lat))):
-                                            if (storm_history[y][180 + m.floor(dlon)] != 2):
-                                                storm_history[y][180 + m.floor(dlon)] = 1
+                            elif quad in [1, 2]:
+                                for y in range((90 + m.floor(dlat)), (90 + m.ceil(lat))):
+                                    if (storm_history[y][180 + m.floor(dlon)] != 2):
+                                        storm_history[y][180 + m.floor(dlon)] = 1
                                             
         
         cumulative_winds += storm_history

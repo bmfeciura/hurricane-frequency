@@ -10,6 +10,8 @@ I have kept a record of my learning in a series of Jupyter Notebooks (in `/noteb
 
 The structure for this project was adapted from [the Cookiecutter Data Science project structure](https://drivendata.github.io/cookiecutter-data-science/).
 
+Please note that some imports will no longer work if running the notebooks within the `/notebooks/` directory because definitions of defaults for dataset files in the modules are dependent on the working directory being the root of this project; moving the notebooks will likely work, but they are intended to be read primarily as reference materials now.
+
 ### Data cleaning
 
 The HURDAT2 dataset contains rows of position data for storms interspersed with header rows to help identify which storm the position data pertains to. Cleaning the data involved separating these rows into two separate datasets and adding/changing columns where necessary.
@@ -65,7 +67,8 @@ wh.wind_history(irma, positions)
 ![png](readme_files/readme_6_1.png)
     
 
-In my opinion, though lower resolution, this graphic compares favorably with the official graphic (shown below for comparison), indicating my implementation is effective.
+
+In my opinion, though much lower resolution, this graphic compares favorably with the official graphic (shown below for comparison), indicating my implementation is effective.
 
 ![png](readme_files/irmawh.png)
 
@@ -81,7 +84,7 @@ trk.plot_season_summary(2017)
 
 
     
-![png](readme_files/readme_8_0.png)
+![png](readme_files/readme_9_0.png)
     
 
 
@@ -94,12 +97,12 @@ With respect to data products that provide more insight, most interesting is the
 from src.d03_processing import frequency as fr
 frequency_matrix = fr.wind_frequency()
 
-wh.heatmap(frequency_matrix)
+wh.heatmap(frequency_matrix, subtitle = "Since 2004")
 ```
 
 
     
-![png](readme_files/readme_10_0.png)
+![png](readme_files/readme_11_0.png)
     
 
 
@@ -121,19 +124,19 @@ october_storms = storms['stormID'][(storms['month_formed'] == 10) & (storms['yea
 august_frequency = fr.wind_frequency(august_storms)
 october_frequency = fr.wind_frequency(october_storms)
 
-wh.heatmap(august_frequency)
-wh.heatmap(october_frequency)
+wh.heatmap(august_frequency, subtitle = "(Storms formed in August, since 2004)")
+wh.heatmap(october_frequency, subtitle = "(Storms formed in October, since 2004)")
 ```
 
 
     
-![png](readme_files/readme_13_0.png)
+![png](readme_files/readme_14_0.png)
     
 
 
 
     
-![png](readme_files/readme_13_1.png)
+![png](readme_files/readme_14_1.png)
     
 
 

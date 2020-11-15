@@ -26,7 +26,7 @@ PROJECTION = ccrs.NearsidePerspective(central_longitude = -55, central_latitude 
 POSITIONS = pd.read_csv('data/02_intermediate/Atlantic_positions.csv')
 STORMS = pd.read_csv('data/02_intermediate/Atlantic_storms.csv')
 
-def wind_history(stormID, positions_df = POSITIONS):
+def wind_history(stormID, positions_df = POSITIONS, storms_df = STORMS):
     # Get the list of all of our coordinates, as well as the lists of wind extents
     storm_lats = trk.track_lat(stormID)
     storm_lons = trk.track_lon(stormID)
@@ -131,10 +131,18 @@ def wind_history(stormID, positions_df = POSITIONS):
     ax.set_global()
     ax.coastlines()
     ax.pcolormesh(Lon, Lat, wind_history_transparent, transform = ccrs.PlateCarree())
+    
+    storm = storms_df[storms_df['stormID']== stormID]
+    name = storm['name'].to_string(index = False).strip()
+    year = storm['year'].to_string(index = False).strip()
+    plt.title(f"Wind History for {name} ({year})", fontsize = 20)
 
     # Note: Tropical Storm Winds in Purple, Hurricane in Yellow
 
-def heatmap(freq_array, export = False, dest_fn = "wind_history_heatmap"):
+def heatmap(freq_array, export = False, dest_fn = "wind_history_heatmap", is_hu_only = False, subtitle = None):
+    
+    if subtitle == None:
+        subtitle = ""
     
     freq_array_transparent = np.ma.masked_equal(freq_array, 0)
     
@@ -149,6 +157,10 @@ def heatmap(freq_array, export = False, dest_fn = "wind_history_heatmap"):
     ax.coastlines()
     mesh = ax.pcolormesh(Lon, Lat, freq_array_transparent, transform = ccrs.PlateCarree())
     plt.colorbar(mesh)
+    if is_hu_only:
+        plt.title(f"Number of Cyclones Producing Hurricane-Force Winds /n {subtitle}", fontsize = 20)
+    else:
+        plt.title(f"Number of Cyclones Producing TS-Force Winds \n {subtitle}", fontsize = 20)
     
     if export:
         fig.savefig(f"../results/images/{dest_fn}.jpg")
