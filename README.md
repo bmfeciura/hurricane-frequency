@@ -2,6 +2,8 @@
 
 This is a project I have taken on to gain experience in using Python and Pandas for data cleaning, processing, and visualization. Having lived my entire life in the Southeastern United States, many years of which were in Florida, I've always had an interest in forecasting tropical cyclones and the factors that drive their development and behavior.
 
+This project incorporates a simple web scraper, functions which clean and organize the data, and several types of visualization.
+
 This project uses the HURDAT2 dataset from [NOAA's NHC Data Archive](https://www.nhc.noaa.gov/data), an archival dataset of best-track data describing the geographic position of the center of each tropical cyclone since consistent recordkeeping began in 1851. This dataset also includes information pertaining to the extent from the center of tropical storm- and hurricane-strength winds in the cyclone.
 
 My goal in this investigation is to practice cleaning and producing visualizations using this data, and to investigate factors which affect the frequency by which particular geographic areas experience the effects of tropical cyclones.
